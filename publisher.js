@@ -6,8 +6,8 @@ const SECRET = "342878a9-b7bf-4b4c-a943-f07e8d84f707";
 // 环境配置映射
 const ENV_CONFIG = {
   env1: {
-    AUTH_URL: "https://spa-shop-sandbox1.eshoptechhub.com/spa-open-api/auth/generate-signature",
-    PUBLISH_URL: "https://spa-shop-sandbox1.eshoptechhub.com/spa-open-api/versions/publish"
+    AUTH_URL: "https://spa-shop-sandbox.eshoptechhub.com/spa-open-api/auth/generate-signature",
+    PUBLISH_URL: "https://spa-shop-sandbox.eshoptechhub.com/spa-open-api/versions/publish"
   },
   env2: {
     AUTH_URL: "https://spa-shop-sandbox2.eshoptechhub.com/spa-open-api/auth/generate-signature",
