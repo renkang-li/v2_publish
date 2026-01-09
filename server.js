@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import { publishBatch } from "./publisher.js";
+import { addRecords, getRecords } from "./recordService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +45,7 @@ function normalizeItems(body = {}) {
 app.post("/api/publish", async (req, res) => {
   const items = normalizeItems(req.body);
   const env = req.body.env || "env2"; // 默认使用测试2环境
+  const userAgent = req.headers["user-agent"] || "";
 
   if (!items.length) {
     return res
@@ -53,11 +55,31 @@ app.post("/api/publish", async (req, res) => {
 
   try {
     const results = await publishBatch(items, env);
+
+    // 保存发布记录
+    addRecords(results, env, userAgent);
+
     res.json({ success: true, results });
   } catch (err) {
     res.status(500).json({
       success: false,
       message: err.message || "服务异常",
+    });
+  }
+});
+
+// 查询发布记录
+app.get("/api/records", (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 20;
+
+  try {
+    const data = getRecords({ page, pageSize });
+    res.json({ success: true, ...data });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "查询失败",
     });
   }
 });
