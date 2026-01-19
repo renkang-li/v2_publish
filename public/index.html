@@ -363,7 +363,7 @@
       <div class="form-group">
         <label>批量粘贴 (每行一条，模板名:版本号)</label>
         <textarea id="bulk" placeholder="template-a:v1.0.0&#10;template-b:v2.3.1"></textarea>
-        <div class="hint">提示：支持英文冒号、空格或竖线分隔粘贴，例如 template-demo v1.2.3 或 template-demo|v1.2.3</div>
+        <div class="hint">提示：支持英文冒号分隔粘贴，例如 template-demo:v1.2.3</div>
       </div>
 
       <div class="actions">
@@ -455,11 +455,8 @@
         .map((line) => line.trim())
         .filter(Boolean)
         .map((line) => {
-          const normalized = line.replace(/[|,]/g, ":").replace(/\s+/, " ");
-          const parts = normalized.includes(":")
-            ? normalized.split(":")
-            : normalized.split(/\s+/);
-
+          // 只支持冒号分隔
+          const parts = line.split(":");
           const template = (parts[0] || "").trim();
           const version = (parts[1] || "").trim();
           return { template, version };
@@ -477,19 +474,37 @@
       // 转换批量输入
       const bulkText = bulkInput.value.trim();
       if (bulkText) {
-        const lines = bulkText.split(/\r?\n/);
+        // 先检查是否是单行多条格式（用 | 分隔，且包含 - 分隔符）
+        // 例如：template-a - v1.0.0|template-b - v2.0.0
+        const isSingleLineMultiple = !bulkText.includes('\n') && 
+          bulkText.includes('|') && 
+          bulkText.includes(' - ');
+        
+        let lines;
+        if (isSingleLineMultiple) {
+          // 将单行多条拆分成多行
+          lines = bulkText.split('|').map(item => item.trim()).filter(Boolean);
+        } else {
+          lines = bulkText.split(/\r?\n/);
+        }
+        
         const transformed = lines.map(line => {
           const trimmed = line.trim();
           if (!trimmed) return line;
 
-          const normalized = trimmed.replace(/[|,]/g, ":").replace(/\s+/, " ");
-          const parts = normalized.includes(":")
-            ? normalized.split(":")
-            : normalized.split(/\s+/);
+          // 如果是 "name - version" 格式，用 " - " 分隔
+          if (trimmed.includes(' - ')) {
+            const parts = trimmed.split(' - ');
+            const template = normalizeTemplateName((parts[0] || "").trim());
+            const version = (parts[1] || "").trim();
+            return version ? `${template}: ${version}` : template;
+          }
 
+          // 只支持冒号分隔
+          const parts = trimmed.split(":");
           const template = normalizeTemplateName((parts[0] || "").trim());
           const version = (parts[1] || "").trim();
-          return version ? `${template}:${version}` : template;
+          return version ? `${template}: ${version}` : template;
         });
         bulkInput.value = transformed.join("\n");
       }
