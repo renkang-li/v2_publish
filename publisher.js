@@ -16,6 +16,10 @@ const ENV_CONFIG = {
   env3: {
     AUTH_URL: "https://spa-shop-sandbox3.eshoptechhub.com/spa-open-api/auth/generate-signature",
     PUBLISH_URL: "https://spa-shop-sandbox3.eshoptechhub.com/spa-open-api/versions/publish"
+  },
+  env4: {
+    AUTH_URL: "https://spa-shop-sandbox4.eshoptechhub.com/spa-open-api/auth/generate-signature",
+    PUBLISH_URL: "https://spa-shop-sandbox4.eshoptechhub.com/spa-open-api/versions/publish"
   }
 };
 

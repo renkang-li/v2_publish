@@ -364,6 +364,7 @@
           <div class="env-btn" id="env1Option">测试1</div>
           <div class="env-btn active" id="env2Option">测试2</div>
           <div class="env-btn" id="env3Option">测试3</div>
+          <div class="env-btn" id="env4Option">测试4</div>
         </div>
         <span class="extra-text">同一页面可完成单条和批量发布</span>
       </div>
@@ -428,6 +429,7 @@
     const env1Option = document.getElementById("env1Option");
     const env2Option = document.getElementById("env2Option");
     const env3Option = document.getElementById("env3Option");
+    const env4Option = document.getElementById("env4Option");
     let currentEnv = "env2"; // 默认环境2
 
     // 环境切换逻辑
@@ -438,14 +440,17 @@
       env1Option.classList.remove("active");
       env2Option.classList.remove("active");
       env3Option.classList.remove("active");
+      env4Option.classList.remove("active");
 
       // 给当前选中的添加 active
       if (env === "env1") {
         env1Option.classList.add("active");
       } else if (env === "env2") {
         env2Option.classList.add("active");
-      } else {
+      } else if (env === "env3") {
         env3Option.classList.add("active");
+      } else {
+        env4Option.classList.add("active");
       }
 
       // 保存到 localStorage
@@ -460,6 +465,7 @@
     env1Option.addEventListener("click", () => switchEnvironment("env1"));
     env2Option.addEventListener("click", () => switchEnvironment("env2"));
     env3Option.addEventListener("click", () => switchEnvironment("env3"));
+    env4Option.addEventListener("click", () => switchEnvironment("env4"));
 
     // 特殊模板映射表
     const TEMPLATE_MAPPING = {
