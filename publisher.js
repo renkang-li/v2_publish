@@ -74,36 +74,49 @@ async function publishTemplate(template, version, env = "env2") {
   return { success: false, message };
 }
 
+// 并发上限，避免一次性把上游 API 打挂
+const PUBLISH_CONCURRENCY = 5;
+
+async function publishOne(item, env) {
+  const template = item?.template?.trim();
+  const version = item?.version?.trim();
+
+  if (!template || !version) {
+    return {
+      template: template || item?.template || "",
+      version: version || item?.version || "",
+      success: false,
+      message: "模板名或版本号缺失",
+    };
+  }
+
+  try {
+    const result = await publishTemplate(template, version, env);
+    return { template, version, ...result };
+  } catch (err) {
+    return {
+      template,
+      version,
+      success: false,
+      message: err.message || "未知错误",
+    };
+  }
+}
+
 async function publishBatch(items = [], env = "env2") {
-  const results = [];
+  const results = new Array(items.length);
+  let cursor = 0;
 
-  for (const item of items) {
-    const template = item?.template?.trim();
-    const version = item?.version?.trim();
-
-    if (!template || !version) {
-      results.push({
-        template: template || item?.template || "",
-        version: version || item?.version || "",
-        success: false,
-        message: "模板名或版本号缺失",
-      });
-      continue;
-    }
-
-    try {
-      const result = await publishTemplate(template, version, env);
-      results.push({ template, version, ...result });
-    } catch (err) {
-      results.push({
-        template,
-        version,
-        success: false,
-        message: err.message || "未知错误",
-      });
+  async function worker() {
+    while (true) {
+      const i = cursor++;
+      if (i >= items.length) return;
+      results[i] = await publishOne(items[i], env);
     }
   }
 
+  const workerCount = Math.min(PUBLISH_CONCURRENCY, items.length);
+  await Promise.all(Array.from({ length: workerCount }, worker));
   return results;
 }
 
