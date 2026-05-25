@@ -13,9 +13,6 @@ logs/
 npm-debug.log*
 publish-records.json
 
-# Docker
-.dockerignore
-
 # IDE
 .vscode/
 .idea/
